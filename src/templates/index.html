@@ -21,7 +21,7 @@
 
   <ul>
   {% for i in commits %}
-  <li> {{i.repository.name}} : {{i.created_at}} - {{ i.type}} {% if i.comment %} with comment: <b>"{{ i.comment}}"</b> {% endif %} while listening to the {{i.album}} album by {{i.artist}} <a href ="{{i.url}}">details</a></li>
+  <li>{{i.created_at}} - {% if i.repository.name %}For repo {{i.repository.name}}:{% endif %}{% if i.comment %} {{ i.comment}} {% endif %} while listening to the album {{i.album}} by {{i.artist}} <a href ="{{i.url}}">details</a></li>
   {% endfor %}  
   </ul>
 </div>
