@@ -49,6 +49,11 @@ class Index(webapp.RequestHandler):
                         git['track'] = track
                         git['album'] = track['album']['#text']
                         git['artist'] = track['artist']['#text']
+                        if git['type'] == "PushEvent":
+                            try:
+                                git['comment'] = git['payload']['shas'][0][2]
+                            except:
+                                pass
                         template_values['commits'].append(git)
                         break
             pass
