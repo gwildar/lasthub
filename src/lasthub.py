@@ -49,6 +49,9 @@ class Index(webapp.RequestHandler):
 
                     template_values['commits'].append(commit)
             
+            if not template_values['commits']:
+                template_values['noresults'] = True
+
         else:
             template_values = {'missing_username' : True}
         path = os.path.join(os.path.dirname(__file__), 'templates/index.html')
@@ -103,21 +106,21 @@ class Index(webapp.RequestHandler):
         commits = []
         
         for event in user_events:
-            if event['type'] == 'PushEvent':
+            if event['type'] == 'PushEvent' and event.has_key('repository'):
                 url = "https://github.com/api/v2/json/commits/show/%s/%s/%s" % (event['repository']['owner'], event['repository']['name'], event['payload']['shas'][0][0])
-                
-                commit_json = urlfetch.fetch(url, validate_certificate=False)
             
+                commit_json = urlfetch.fetch(url, validate_certificate=False)
+        
                 if commit_json.status_code == 200:
                     commit = simplejson.loads(commit_json.content)
-                    
+                
                     # build dict for use later
                     date_time, offset = commit['commit']['committed_date'].rsplit('-', 1)
                     start_time = datetime.strptime(date_time, '%Y-%m-%dT%H:%M:%S')
                     commit['commit_time'] = start_time + timedelta(hours=int(offset.split(':')[0]))
                     commit['repo'] = event['repository']['name']
                     commits.append(commit)
-            
+        
         return commits
 
     
