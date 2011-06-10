@@ -16,7 +16,7 @@ class Index(webapp.RequestHandler):
         self.response.out.write(template.render(path, {}))
         
     def post(self):
-        
+        """Handle data posted from main form"""
         
         lastfm_username = self.request.get('lastfm')
         github_username = self.request.get('github')
@@ -24,20 +24,6 @@ class Index(webapp.RequestHandler):
         if lastfm_username and github_username:
             github = self._fetch_github(github_username)
             
-            
-            # date, time, offset = github[0]['created_at'].rsplit(' ')
-            # datetime.strptime(date + ' ' + time, '%Y/%m/%d %H:%M:%S')
-            
-
-            # lastfm is using UTC we need to add an on the delta from github
-            # lastfm['recenttracks']['track'][1]['date']
-            # datetime.fromtimestamp(float(lastfm['recenttracks']['track'][1]['date']['uts']))
-            
-            # lastfm['recenttracks']['track'][1]['album']['#text'] => album name
-            
-            # find a track with 3 mins (before) a commit extend out until we find the last track that hour
-            
-
             template_values = {'commits' : []}
             
             for commit in github:
@@ -56,41 +42,7 @@ class Index(webapp.RequestHandler):
             template_values = {'missing_username' : True}
         path = os.path.join(os.path.dirname(__file__), 'templates/index.html')
         self.response.out.write(template.render(path, template_values))
-
-    def _set_title_body(self, github):
-        """create a meaning string from the github action
-        """
-
-        if github['type'] == 'CreateEvent':
-            if github['payload'].has_key('object_name'):
-                title = "Created branch %s from %s" % (github['payload']['object_name'], github['payload']['name'])
-            else:
-                title = "Created new branch called %s for %s" % (github['payload']['ref'], github['repository']['name'],)
-        elif github['type'] == 'GistEvent':
-            title = "Created gist %s" % (github['payload']['desc'])
-        elif github['type'] == 'IssuesEvent':
-            title = "Issue #%s was %s" % (str(github['payload']['number']), github['payload']['action'])
-        elif github['type'] == 'ForkEvent':
-            title = "Repo %s forked." % (github['payload']['repo'])
-        elif github['type'] == 'PushEvent':
-            title = "Pushed to repo %s with comment %s." % (github['payload']['repo'], github['payload']['shas'][0][2])
-        elif github['type'] == 'CreateEvent':
-            title = "Branch %s for %s" % (github['payload']['object_name'], github['payload']['name'])
-        elif github['type'] == 'WatchEvent':
-            title = "Started watching %s." % (github['payload']['repo'])
-        elif github['type'] == 'FollowEvent':
-            title = "Started following %s." % (github['payload']['target']['login'])
-        elif github['type'] == 'GistEvent':
-            title = "Snippet: %s" % (github['payload']['snippet'])
-        elif github['type'] == 'DeleteEvent':
-            title = "Deleted: %s called %s" % (github['payload']['ref_type'], github['payload']['ref'])
-        elif github['type'] == 'GollumEvent':
-            pass
-        elif github['type'] == 'IssueCommentEvent':
-            title = "Commented on issue with id of %s" % (github['payload']['issue_id'])
-
-        return title
-        
+      
     def _fetch_github(self, username):
         """Fetch all the detials for a user in github."""
 
